@@ -64,10 +64,6 @@ def arrange(yt,xt):#Separates Yt and Xt into separate variables
         yt.append(str(data[i])[10:11])
         xt.append(str(data[i])[2:6])
 
-data=dataExtraction()
-yt=[]
-xt=[]
-arrange(yt,xt)
 
 def checkOneHot(Char):
     if Char=='R':
@@ -105,5 +101,8 @@ layer1= Layer(2,7)#Creates layer 1, 2 features and 7 neurons
 activation1=Activation_RELU() #activation for layer 1(Input layer)
 layer1.forwardPass(X)
 """
-
+data=dataExtraction()
+yt=[]
+xt=[]
+arrange(yt,xt)
 print(getInputs(xt))

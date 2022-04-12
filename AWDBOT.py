@@ -23,7 +23,7 @@ def progressbar(it, prefix="", size=60, file=sys.stdout):#Progress bar for indic
 class Layer:# Class defines different layers in NN
     def __init__(self, num_inputs,num_neurons):#initializes random weights and Biases
         self.weights = 0.10*np.random.randn(num_inputs,num_neurons)
-        self.biases = np.zeros((1, num_neurons))
+        self.biases = np.ones((1, num_neurons))
 
     def forwardPass(self, inputs):
         self.output = np.dot(inputs, self.weights) + self.biases
@@ -104,11 +104,21 @@ xt=[]
 arrange(yt,xt)
 inputs=getInputs(xt)
 
-inputLayer= Layer(12,12)
-inputLayer.forwardPass(inputs)
-print(inputLayer.output)
-"""
+inputLayer= Layer(12,12) #input layer creation
+hiddenLayer= Layer(12,3)# Hidden layer creation
+outputLayer= Layer(3,3)# Output layer
+
 activation1=Activation_RELU() #activation for layer 1(Input layer)
-hiddenLayer= Layer(12,3)
+
 inputLayer.forwardPass(inputs)
-"""
+
+activation1.forward(inputLayer.output)#input layer goes into activation function in hidden layer
+hiddenLayer.forwardPass(activation1.output)#result of activation goes into hidden feed forward
+
+#We need need aa softmax before this activation before this
+outputLayer.forwardPass(hiddenLayer.output)
+
+
+
+
+

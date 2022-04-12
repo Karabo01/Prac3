@@ -77,21 +77,33 @@ def checkOneHot(Char):
     else:
         return 2
 
-def getInputs(xt):
+def getInputs(xt):#Return a batch of inputs
     X=[]
     for i in range(int(0.001*len(xt))):
         X.append([])
-        for j in range(7):
+        for j in range(12):
             X[i].append(0)
+
     for i in range(int(0.001*len(xt))):
-        play=str(xt[i][1:2])
-        index=checkOneHot(play)
-        X[i][index]=="heloo"#for some reason thisdoesnt work
+        playX=str(xt[i][0:1])
+        index=checkOneHot(playX)
+        X[i][index] = 1
+        playY=str(xt[i][1:2])
+        index = checkOneHot(playY)
+        X[i][index+3]=1
+
+        playX = str(xt[i][2:3])
+        index = checkOneHot(playX)
+        X[i][index+6] = 1
+        playY = str(xt[i][3:4])
+        index = checkOneHot(playY)
+        X[i][index + 9] = 1
+    return X
 
 """
 layer1= Layer(2,7)#Creates layer 1, 2 features and 7 neurons
 activation1=Activation_RELU() #activation for layer 1(Input layer)
 layer1.forwardPass(X)
 """
-getInputs(xt)
-print("hello")
+
+print(getInputs(xt))

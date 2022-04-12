@@ -21,8 +21,8 @@ def progressbar(it, prefix="", size=60, file=sys.stdout):#Progress bar for indic
 
 
 class Layer:# Class defines different layers in NN
-    def _init_(self, num_inputs,num_neurons):#initializes random weights and Biases
-        self.weights = 0.10*np.random(num_inputs,num_neurons)
+    def __init__(self, num_inputs,num_neurons):#initializes random weights and Biases
+        self.weights = 0.10*np.random.randn(num_inputs,num_neurons)
         self.biases = np.zeros((1, num_neurons))
 
     def forwardPass(self, inputs):
@@ -65,7 +65,7 @@ def arrange(yt,xt):#Separates Yt and Xt into separate variables
         xt.append(str(data[i])[2:6])
 
 
-def checkOneHot(Char):
+def checkOneHot(Char):#Create onehot encoding
     if Char=='R':
         return 0
     elif Char=='P':
@@ -96,13 +96,19 @@ def getInputs(xt):#Return a batch of inputs
         X[i][index + 9] = 1
     return X
 
-"""
-layer1= Layer(2,7)#Creates layer 1, 2 features and 7 neurons
-activation1=Activation_RELU() #activation for layer 1(Input layer)
-layer1.forwardPass(X)
-"""
+
+
 data=dataExtraction()
 yt=[]
 xt=[]
 arrange(yt,xt)
-print(getInputs(xt))
+inputs=getInputs(xt)
+
+inputLayer= Layer(12,12)
+inputLayer.forwardPass(inputs)
+print(inputLayer.output)
+"""
+activation1=Activation_RELU() #activation for layer 1(Input layer)
+hiddenLayer= Layer(12,3)
+inputLayer.forwardPass(inputs)
+"""

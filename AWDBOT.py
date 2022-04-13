@@ -77,14 +77,14 @@ def checkOneHot(Char):#Create onehot encoding
     else:
         return 2
 
-def getInputs(xt):#Return a batch of inputs
+def getInputs(xt,percent):#Return a batch of inputs
     X=[]
-    for i in range(int(0.001*len(xt))):
+    for i in range(int(percent*len(xt))):
         X.append([])
         for j in range(12):
             X[i].append(0)
 
-    for i in range(int(0.001*len(xt))):
+    for i in range(int(percent*len(xt))):
         playX=str(xt[i][0:1])
         index=checkOneHot(playX)
         X[i][index] = 1
@@ -105,8 +105,10 @@ def getInputs(xt):#Return a batch of inputs
 data=dataExtraction()
 yt=[]
 xt=[]
+p=1
+percentageofCSV=p/1000000
 arrange(yt,xt)
-inputs=getInputs(xt)
+inputs=getInputs(xt,percentageofCSV)
 
 inputLayer= Layer(12,12) #input layer creation
 hiddenLayer= Layer(12,3)# Hidden layer creation
@@ -129,6 +131,6 @@ outputLayer.forwardPass(hiddenLayer.output)
 
 print(outputLayer.output)
 
-#hey
+print("hello")
 
 

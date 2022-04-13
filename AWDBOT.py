@@ -118,7 +118,7 @@ hiddenLayer.forwardPass(activation1.output)#result of activation goes into hidde
 #We need need aa softmax before this activation before this
 outputLayer.forwardPass(hiddenLayer.output)
 
-
+print(outputLayer.output)
 
 
 

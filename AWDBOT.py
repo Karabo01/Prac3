@@ -32,7 +32,11 @@ class Activation_RELU: # Activation class for neurons
     def forward(self, inputs):
         self.output = np.maximum(0, inputs)
 
-
+class softmax:
+    def forward(self, inputs):#calculate the individual soft maxes of the nodes
+        exp_values = np.exp(inputs * np.max(inputs, axis = 1, keepdims = True))
+        probabilities = exp_values / np.sum(exp_values, axis = 1, keepdims = True)
+        self.ouput = probabilities
 
 def reConvert(val):#Converts integers into RPS
     if val==1:
@@ -115,8 +119,14 @@ inputLayer.forwardPass(inputs)
 activation1.forward(inputLayer.output)#input layer goes into activation function in hidden layer
 hiddenLayer.forwardPass(activation1.output)#result of activation goes into hidden feed forward
 
+smActivation = softmax()
+smActivation.forward(hiddenLayer.output)
+
+#print(hiddenLayer.weights)
+print(smActivation.ouput)
 #We need need aa softmax before this activation before this
 outputLayer.forwardPass(hiddenLayer.output)
+
 
 
 

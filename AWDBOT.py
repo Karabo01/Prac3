@@ -38,6 +38,17 @@ class softmax:
         probabilities = exp_values / np.sum(exp_values, axis = 1, keepdims = True)
         self.ouput = probabilities
 
+class loss:
+    def getLoss(self, inputs, expected):
+        fLoss = 0
+        epoch = np.subtract(inputs,expected, out = None)
+        epoch = np.square(epoch)
+        print(epoch)
+        for i in range(len(inputs)):
+            for j in range(len(expected[0])):
+                fLoss += epoch[i][j]
+        self.output = 0.5 * fLoss
+
 def reConvert(val):#Converts integers into RPS
     if val==1:
         return 'R'
@@ -124,12 +135,15 @@ hiddenLayer.forwardPass(activation1.output)#result of activation goes into hidde
 smActivation = softmax()
 smActivation.forward(hiddenLayer.output)
 
-#print(hiddenLayer.weights)
+
 print(smActivation.ouput)
+exp = np.zeros((p, 3)) #intialization of one hot but I havent made the actual one hot
+theLoss = loss()
+theLoss.getLoss(smActivation.ouput,exp)
+print(theLoss.output)
 #We need need aa softmax before this activation before this
 outputLayer.forwardPass(hiddenLayer.output)
 
-print(outputLayer.output)
 
 print("hello")
 

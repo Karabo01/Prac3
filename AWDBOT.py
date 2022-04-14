@@ -146,7 +146,6 @@ hiddenLayer.forwardPass(activation1.output)#result of activation goes into hidde
 smActivation = softmax()
 smActivation.forward(hiddenLayer.output)
 
-
 print(smActivation.ouput)
 
 exp = oneHotEncoding(yt,5) #five was just for tsting usually it's P

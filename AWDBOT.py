@@ -111,8 +111,19 @@ def getInputs(xt,percent):#Return a batch of inputs
         X[i][index + 9] = 1
     return X
 
-
-
+def oneHotEncoding(arr, batch_size):
+    onehot = []
+    temp = [0,0,0]
+    for i in range (batch_size):
+        if arr[i] == 'R':
+            temp[0] = 1
+        elif arr[i] == 'P':
+            temp[1] = 1
+        elif arr[i] == 'S':
+            temp[2] = 1
+        onehot.append(temp)
+        temp = [0,0,0]
+    return onehot
 data=dataExtraction()
 yt=[]
 xt=[]
@@ -137,7 +148,9 @@ smActivation.forward(hiddenLayer.output)
 
 
 print(smActivation.ouput)
-exp = np.zeros((p, 3)) #intialization of one hot but I havent made the actual one hot
+
+exp = oneHotEncoding(yt,5) #five was just for tsting usually it's P
+print(exp)
 theLoss = loss()
 theLoss.getLoss(smActivation.ouput,exp)
 print(theLoss.output)

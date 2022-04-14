@@ -43,7 +43,6 @@ class loss:
         fLoss = 0
         epoch = np.subtract(inputs,expected, out = None)
         epoch = np.square(epoch)
-        print(epoch)
         for i in range(len(inputs)):
             for j in range(len(expected[0])):
                 fLoss += epoch[i][j]
@@ -132,12 +131,25 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut):
     hiddenError= np.dot(outDelta, Olayer.weights)
     hiddenDelta = hiddenError * Hlayer.output * (1-Hlayer.output)
 
-    newWeight1= np.dot(Hlayer.output,outDelta)/N
-    newWeight2 = np.dot(Ilayer.output,hiddenDelta)/ N
+    newWeight1= np.dot(Hlayer.output.T,outDelta)
+    newWeight2 = np.dot(Ilayer.output.T,hiddenDelta)
 
     Olayer.weights= Olayer.weights - rate* newWeight1
     Hlayer.weights = Hlayer.weights - rate* newWeight2
 
+def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp):
+    inputLayer.forwardPass(inputs)
+
+    activation1.forward(inputLayer.output)  # input layer goes into activation function in hidden layer
+    hiddenLayer.forwardPass(activation1.output)  # result of activation goes into hidden feed forward
+
+    smActivation.forward(hiddenLayer.output)
+
+    outputLayer.forwardPass(smActivation.ouput)
+    theLoss.getLoss(outputLayer.output, exp)
+
+
+    theLoss.getLoss(outputLayer.output, exp)
 data=dataExtraction()
 yt=[]
 xt=[]
@@ -146,29 +158,47 @@ percentageofCSV=p/1000000
 arrange(yt,xt)
 inputs=getInputs(xt,percentageofCSV)
 
+#Initialization
 inputLayer= Layer(12,12) #input layer creation
 hiddenLayer= Layer(12,3)# Hidden layer creation
 outputLayer= Layer(3,3)# Output layer
-
-activation1=Activation_RELU() #activation for layer 1(Input layer)
-
-inputLayer.forwardPass(inputs)
-
-activation1.forward(inputLayer.output)#input layer goes into activation function in hidden layer
-hiddenLayer.forwardPass(activation1.output)#result of activation goes into hidden feed forward
-
 smActivation = softmax()
-smActivation.forward(hiddenLayer.output)
-
-print(smActivation.ouput)
-
-exp = oneHotEncoding(yt,p) #five was just for tsting usually it's P
-print(exp)
+activation1=Activation_RELU() #activation for layer 1(Input layer)
 theLoss = loss()
-theLoss.getLoss(smActivation.ouput,exp)
+exp = oneHotEncoding(yt, p)
+
+
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
 print(theLoss.output)
-#We need need aa softmax before this activation before this
-outputLayer.forwardPass(hiddenLayer.output)
+
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
+print(theLoss.output)
+
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
+print(theLoss.output)
+
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
+print(theLoss.output)
+
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
+print(theLoss.output)
+
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
+print(theLoss.output)
+
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
+print(theLoss.output)
+
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
+print(theLoss.output)
 
 
 print("hello")

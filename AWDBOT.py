@@ -116,14 +116,28 @@ def oneHotEncoding(arr, batch_size):
     temp = [0,0,0]
     for i in range (batch_size):
         if arr[i] == 'R':
-            temp[0] = 1
-        elif arr[i] == 'P':
             temp[1] = 1
-        elif arr[i] == 'S':
+        elif arr[i] == 'P':
             temp[2] = 1
+        elif arr[i] == 'S':
+            temp[0] = 1
         onehot.append(temp)
         temp = [0,0,0]
     return onehot
+
+def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut):
+    outError= Olayer.output - expOut
+    outDelta= outError * Olayer.output * (1 - Olayer.output)
+
+    hiddenError= np.dot(outDelta, Olayer.weights)
+    hiddenDelta = hiddenError * Hlayer.output * (1-Hlayer.output)
+
+    newWeight1= np.dot(Hlayer.output,outDelta)/N
+    newWeight2 = np.dot(Ilayer.output,hiddenDelta)/ N
+
+    Olayer.weights= Olayer.weights - rate* newWeight1
+    Hlayer.weights = Hlayer.weights - rate* newWeight2
+
 data=dataExtraction()
 yt=[]
 xt=[]
@@ -148,7 +162,7 @@ smActivation.forward(hiddenLayer.output)
 
 print(smActivation.ouput)
 
-exp = oneHotEncoding(yt,5) #five was just for tsting usually it's P
+exp = oneHotEncoding(yt,p) #five was just for tsting usually it's P
 print(exp)
 theLoss = loss()
 theLoss.getLoss(smActivation.ouput,exp)

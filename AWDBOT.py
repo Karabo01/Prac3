@@ -34,9 +34,9 @@ class Activation_RELU: # Activation class for neurons
 
 class softmax:
     def forward(self, inputs):#calculate the individual soft maxes of the nodes
-        exp_values = np.exp(inputs * np.max(inputs, axis = 1, keepdims = True))
+        exp_values = np.exp(inputs - np.max(inputs, axis = 1, keepdims = True))
         probabilities = exp_values / np.sum(exp_values, axis = 1, keepdims = True)
-        self.ouput = probabilities
+        self.output = probabilities
 
 class loss:
     def getLoss(self, inputs, expected):
@@ -141,64 +141,50 @@ def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theL
     inputLayer.forwardPass(inputs)
 
     activation1.forward(inputLayer.output)  # input layer goes into activation function in hidden layer
+
     hiddenLayer.forwardPass(activation1.output)  # result of activation goes into hidden feed forward
 
-    smActivation.forward(hiddenLayer.output)
+    activation1.forward(hiddenLayer.output)
 
-    outputLayer.forwardPass(smActivation.ouput)
-    theLoss.getLoss(outputLayer.output, exp)
+    outputLayer.forwardPass(activation1.output)
+    smActivation.forward(outputLayer.output)
+
+    theLoss.getLoss(smActivation.output, exp)
 
 
-    theLoss.getLoss(outputLayer.output, exp)
 data=dataExtraction()
 yt=[]
 xt=[]
-p=1
+p=10000
 percentageofCSV=p/1000000
 arrange(yt,xt)
 inputs=getInputs(xt,percentageofCSV)
 
 #Initialization
-inputLayer= Layer(12,12) #input layer creation
-hiddenLayer= Layer(12,3)# Hidden layer creation
+inputLayer= Layer(12,3) #input layer creation
+hiddenLayer= Layer(3,3)# Hidden layer creation
 outputLayer= Layer(3,3)# Output layer
 smActivation = softmax()
 activation1=Activation_RELU() #activation for layer 1(Input layer)
 theLoss = loss()
 exp = oneHotEncoding(yt, p)
 
-
 forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-print(theLoss.output)
+print(theLoss.output/p)
+j=0
+ran=1000
+l = 0.1
+for i in range(ran):
+    forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+    backPropagation(0.001, outputLayer, hiddenLayer, inputLayer, exp)
+    if(j/ran>=l):
+        print("#", end=" " )
+        l+=0.1
+    j += 1
 
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-print(theLoss.output)
+print(theLoss.output/p)
+print(smActivation.output[:1])
 
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-print(theLoss.output)
-
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-print(theLoss.output)
-
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-print(theLoss.output)
-
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-print(theLoss.output)
-
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-print(theLoss.output)
-
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-print(theLoss.output)
 
 
 print("hello")

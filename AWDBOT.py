@@ -28,9 +28,9 @@ class Layer:# Class defines different layers in NN
     def forwardPass(self, inputs):
         self.output = np.dot(inputs, self.weights) + self.biases
 
-class Activation_RELU: # Activation class for neurons
+class Sigmoid: # Activation class for neurons
     def forward(self, inputs):
-        self.output = np.maximum(0, inputs)
+        self.output = 1/(1+ np.exp(-inputs))
 
 class softmax:
     def forward(self, inputs):#calculate the individual soft maxes of the nodes
@@ -131,13 +131,24 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut):
     hiddenError= np.dot(outDelta, Olayer.weights)
     hiddenDelta = hiddenError * Hlayer.output * (1-Hlayer.output)
 
-    newWeight1= np.dot(Hlayer.output.T,outDelta)
-    newWeight2 = np.dot(Ilayer.output.T,hiddenDelta)
+    newWeight1= np.dot(Hlayer.output.T,outDelta)/len(expOut)
+    newWeight2 = np.dot(Ilayer.output.T,hiddenDelta)/len(expOut)
 
     Olayer.weights= Olayer.weights - rate* newWeight1
     Hlayer.weights = Hlayer.weights - rate* newWeight2
 
+    filename = "input_hidden_updated.txt"
+    with open(filename, 'w') as csvfile:  # Write data to text file
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(Hlayer.weights)
+
+    filename = "hidden_output_updated.txt"
+    with open(filename, 'w') as csvfile:  # Write data to text file
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(Olayer.weights)
+
 def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp):
+
     inputLayer.forwardPass(inputs)
 
     activation1.forward(inputLayer.output)  # input layer goes into activation function in hidden layer
@@ -150,6 +161,16 @@ def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theL
     smActivation.forward(outputLayer.output)
 
     theLoss.getLoss(smActivation.output, exp)
+
+    filename = "input_hidden.txt"
+    with open(filename, 'w') as csvfile:  # Write data to text file
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(hiddenLayer.weights)
+
+    filename = "hidden_output.txt"
+    with open(filename, 'w') as csvfile:  # Write data to text file
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(outputLayer.weights)
 
 
 data=dataExtraction()
@@ -165,18 +186,18 @@ inputLayer= Layer(12,3) #input layer creation
 hiddenLayer= Layer(3,3)# Hidden layer creation
 outputLayer= Layer(3,3)# Output layer
 smActivation = softmax()
-activation1=Activation_RELU() #activation for layer 1(Input layer)
+activation1=Sigmoid() #activation for layer 1(Input layer)
 theLoss = loss()
 exp = oneHotEncoding(yt, p)
 
 forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
 print(theLoss.output/p)
 j=0
-ran=1000
+ran=1500
 l = 0.1
 for i in range(ran):
     forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-    backPropagation(0.001, outputLayer, hiddenLayer, inputLayer, exp)
+    backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
     if(j/ran>=l):
         print("#", end=" " )
         l+=0.1

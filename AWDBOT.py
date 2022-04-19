@@ -31,7 +31,7 @@ class Layer:# Class defines different layers in NN
 
 class Sigmoid: # Activation class for neurons
     def forward(self, inputs):
-        self.output = 1/(1+ np.exp(inputs - np.max(inputs, axis = 1, keepdims = True)))
+        self.output = 1/(1+ np.exp((inputs - np.max(inputs, axis = 1, keepdims = True))))
 
 class softmax:
     def forward(self, inputs):#calculate the individual soft maxes of the nodes
@@ -123,7 +123,9 @@ def oneHotEncoding(arr, batch_size):
             temp[0] = 1
         onehot.append(temp)
         temp = [0,0,0]
-    return onehot
+
+    output= np.array(onehot)
+    return output
 
 def Accuracy(inputs, expected):
     predicions_correct = inputs.argmax(axis=1) == expected.argmax(axis=1)
@@ -138,8 +140,8 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut):
     hiddenError= np.dot(outDelta, Olayer.weights)
     hiddenDelta = hiddenError * Hlayer.output * (1-Hlayer.output)
 
-    newWeight1= np.dot(Hlayer.output.T,outDelta)/len(expOut)
-    newWeight2 = np.dot(Ilayer.output.T,hiddenDelta)/len(expOut)
+    newWeight1= np.dot(Hlayer.output.T,outDelta)/expOut.size
+    newWeight2 = np.dot(Ilayer.output.T,hiddenDelta)/expOut.size
 
     Olayer.weights= Olayer.weights - rate* newWeight1
     Hlayer.weights = Hlayer.weights - rate* newWeight2
@@ -184,7 +186,7 @@ def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theL
 data=dataExtraction()
 yt=[]
 xt=[]
-p=1000
+p=5
 percentageofCSV=p/1000000
 arrange(yt,xt)
 inputs=getInputs(xt,percentageofCSV)
@@ -202,7 +204,7 @@ forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,
 loss=[]
 acc=[]
 j=0
-epochs=10
+epochs=1000
 l = 0.1
 for i in range(epochs):
     if(i==0):
@@ -219,20 +221,21 @@ for i in range(epochs):
         l += 0.1
     j += 1
 
-    backPropagation(0.9, outputLayer, hiddenLayer, inputLayer,smActivation, exp)
+    backPropagation(0.3, outputLayer, hiddenLayer, inputLayer, exp)
 
 
 
 #print(theLoss.output/p)
 print(smActivation.output[:1])
 
-test=inputs[1]
+
 
 forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
 print(smActivation.output[:1])
 
-t=np.linspace(0,1,epochs)
+t=np.arange(0,epochs,1)
 h=acc
+
 plt.figure(1)
 plt.plot(t,h)
 plt.grid(True)
@@ -240,11 +243,13 @@ plt.xlabel('# of Epochs')
 plt.ylabel('Accuracy')
 plt.title ('Accuracy')
 
-t=np.linspace(0,1,epochs)
+
+t=np.arange(0,epochs,1)
 h=loss
-plt.figure(1)
+plt.figure(2)
 plt.plot(t,h)
 plt.grid(True)
 plt.xlabel('# of Epochs')
-plt.ylabel('Accuracy')
-plt.title ('Accuracy')
+plt.ylabel('Loss')
+plt.title ('Loss')
+plt.show()

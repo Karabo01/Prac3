@@ -2,6 +2,7 @@ import numpy as np
 import csv
 import time
 import math
+import matplotlib.pyplot as plt
 np.random.seed(0)
 
 import sys
@@ -30,7 +31,7 @@ class Layer:# Class defines different layers in NN
 
 class Sigmoid: # Activation class for neurons
     def forward(self, inputs):
-        self.output = 1/(1+ np.exp(-inputs))
+        self.output = 1/(1+ np.exp(inputs - np.max(inputs, axis = 1, keepdims = True)))
 
 class softmax:
     def forward(self, inputs):#calculate the individual soft maxes of the nodes
@@ -41,7 +42,7 @@ class softmax:
 class loss:
     def getLoss(self, inputs, expected):
         fLoss = 0
-        epoch = np.subtract(inputs,expected, out = None)
+        epoch = np.subtract(expected,inputs, out = None)
         epoch = np.square(epoch)
         for i in range(len(inputs)):
             for j in range(len(expected[0])):
@@ -124,6 +125,12 @@ def oneHotEncoding(arr, batch_size):
         temp = [0,0,0]
     return onehot
 
+def Accuracy(inputs, expected):
+    predicions_correct = inputs.argmax(axis=1) == expected.argmax(axis=1)
+    accuracy = predicions_correct.mean()
+    return accuracy
+
+
 def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut):
     outError= Olayer.output - expOut
     outDelta= outError * Olayer.output * (1 - Olayer.output)
@@ -136,6 +143,7 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut):
 
     Olayer.weights= Olayer.weights - rate* newWeight1
     Hlayer.weights = Hlayer.weights - rate* newWeight2
+
 
     filename = "input_hidden_updated.txt"
     with open(filename, 'w') as csvfile:  # Write data to text file
@@ -160,7 +168,7 @@ def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theL
     outputLayer.forwardPass(activation1.output)
     smActivation.forward(outputLayer.output)
 
-    theLoss.getLoss(smActivation.output, exp)
+    theLoss.getLoss(smActivation.output,exp)
 
     filename = "input_hidden.txt"
     with open(filename, 'w') as csvfile:  # Write data to text file
@@ -176,7 +184,7 @@ def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theL
 data=dataExtraction()
 yt=[]
 xt=[]
-p=10000
+p=1000
 percentageofCSV=p/1000000
 arrange(yt,xt)
 inputs=getInputs(xt,percentageofCSV)
@@ -191,23 +199,52 @@ theLoss = loss()
 exp = oneHotEncoding(yt, p)
 
 forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-print(theLoss.output/p)
+loss=[]
+acc=[]
 j=0
-ran=1500
+epochs=10
 l = 0.1
-for i in range(ran):
+for i in range(epochs):
+    if(i==0):
+        print("Training in progress: ")
     forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-    backPropagation(0.1, outputLayer, hiddenLayer, inputLayer, exp)
-    if(j/ran>=l):
-        print("#", end=" " )
-        l+=0.1
+    loss.append(theLoss.output / p)
+    acc.append(Accuracy(smActivation.output,exp))
+    if (j / epochs >= l):
+        #print("#", end=" ")
+        print(theLoss.output / p)
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
+        print(current_time)
+        l += 0.1
     j += 1
 
-print(theLoss.output/p)
+    backPropagation(0.9, outputLayer, hiddenLayer, inputLayer,smActivation, exp)
+
+
+
+#print(theLoss.output/p)
 print(smActivation.output[:1])
 
+test=inputs[1]
 
+forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+print(smActivation.output[:1])
 
-print("hello")
+t=np.linspace(0,1,epochs)
+h=acc
+plt.figure(1)
+plt.plot(t,h)
+plt.grid(True)
+plt.xlabel('# of Epochs')
+plt.ylabel('Accuracy')
+plt.title ('Accuracy')
 
-
+t=np.linspace(0,1,epochs)
+h=loss
+plt.figure(1)
+plt.plot(t,h)
+plt.grid(True)
+plt.xlabel('# of Epochs')
+plt.ylabel('Accuracy')
+plt.title ('Accuracy')

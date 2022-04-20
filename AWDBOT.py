@@ -172,21 +172,13 @@ def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theL
 
     theLoss.getLoss(smActivation.output,exp)
 
-    filename = "input_hidden.txt"
-    with open(filename, 'w') as csvfile:  # Write data to text file
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(hiddenLayer.weights)
 
-    filename = "hidden_output.txt"
-    with open(filename, 'w') as csvfile:  # Write data to text file
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(outputLayer.weights)
 
 
 data=dataExtraction()
 yt=[]
 xt=[]
-p=5
+p=900000
 percentageofCSV=p/1000000
 arrange(yt,xt)
 inputs=getInputs(xt,percentageofCSV)
@@ -200,28 +192,47 @@ activation1=Sigmoid() #activation for layer 1(Input layer)
 theLoss = loss()
 exp = oneHotEncoding(yt, p)
 
+
 forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+
+##Save weights to file
+filename = "input_hidden.txt"
+with open(filename, 'w') as csvfile:  # Write data to text file
+    csvwriter = csv.writer(csvfile)
+    csvwriter.writerow(hiddenLayer.weights)
+
+filename = "hidden_output.txt"
+with open(filename, 'w') as csvfile:  # Write data to text file
+    csvwriter = csv.writer(csvfile)
+    csvwriter.writerow(outputLayer.weights)
+
+
 loss=[]
 acc=[]
+avgAcc=0
 j=0
-epochs=1000
+epochs=1
 l = 0.1
-for i in range(epochs):
-    if(i==0):
-        print("Training in progress: ")
-    forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-    loss.append(theLoss.output / p)
-    acc.append(Accuracy(smActivation.output,exp))
-    if (j / epochs >= l):
-        #print("#", end=" ")
-        print(theLoss.output / p)
-        t = time.localtime()
-        current_time = time.strftime("%H:%M:%S", t)
-        print(current_time)
-        l += 0.1
-    j += 1
+while(avgAcc<0.8):
+    for i in range(epochs):
+        if(i==0):
+            print("Training in progress: ")
+        forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+        loss.append(theLoss.output / p)
+        acc.append(Accuracy(smActivation.output,exp))
+        if (j / epochs >= l):
+            #print("#", end=" ")
+            print(theLoss.output / p)
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
+            print(current_time)
+            l += 0.1
+        j += 1
 
-    backPropagation(0.3, outputLayer, hiddenLayer, inputLayer, exp)
+        backPropagation(0.2, outputLayer, hiddenLayer, inputLayer, exp)
+        epochs+=1
+    avgAcc=np.mean(acc)
+    print("Mean accuracy: ", avgAcc)
 
 
 

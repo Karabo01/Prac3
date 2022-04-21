@@ -3,7 +3,7 @@ import csv
 import time
 import math
 import matplotlib.pyplot as plt
-np.random.seed(10)
+np.random.seed(2)
 
 import sys
 
@@ -26,7 +26,8 @@ class Layer:# Class defines different layers in NN
         self.weights = 0.10*np.random.randn(num_inputs,num_neurons)
         self.biases = np.ones((1, num_neurons))
 
-    def forwardPass(self, inputs):
+    def forwardPass(self, X):
+        inputs=np.array(X)
         self.output = np.dot(inputs, self.weights) + self.biases
 
 class Sigmoid: # Activation class for neurons
@@ -152,19 +153,24 @@ def importWeights(inLayer, HLayer, OLayer):
     print("Hidden layer weights extracted!!")
     HLayer.weights = np.array(data)
 
-def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut):
-    outError= Olayer.output - expOut
-    outDelta= outError * Olayer.output * (1 - Olayer.output)
+def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut, activation1, smActivation):
+    X=np.array(inputs)
+    outError= smActivation.output - expOut
+    outDelta= outError * smActivation.output * (1 - smActivation.output)
 
-    hiddenError= np.dot(outDelta, Hlayer.weights.T)
-    hiddenDelta = hiddenError * Hlayer.output * (1-Hlayer.output)
+    hiddenError= np.dot(outDelta, Olayer.weights.T)
+    hiddenDelta = hiddenError * activation1.output * (1-activation1.output)
 
-    newWeightH= np.dot(Hlayer.output.T,outDelta)/expOut.size
-    newWeightI = np.dot(Ilayer.output.T,hiddenDelta)/expOut.size
+    newWeightH= np.dot(activation1.output.T,outDelta)/expOut.size
+    newWeightI = np.dot(hiddenLayer.output.T,hiddenDelta)/expOut.size
 
-    Hlayer.weights= Hlayer.weights - rate* newWeightH
-    Ilayer.weights = Ilayer.weights -rate* newWeightI
-
+    Olayer.weights= Olayer.weights - rate* newWeightH
+    #Hlayer.weights = Hlayer.weights - rate*newWeightI
+    i=0
+    while(i<12):
+        for j in range(3):
+            Hlayer.weights[i+j] = Hlayer.weights[i+j] - rate * newWeightI[j]
+        i+=3
 
     filename = "input_hidden_updated.txt"
     with open(filename, 'w') as csvfile:  # Write data to text file
@@ -178,11 +184,12 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut):
 
 def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp):
 
+    """
     inputLayer.forwardPass(inputs)
 
     activation1.forward(inputLayer.output)  # input layer goes into activation function in hidden layer
-
-    hiddenLayer.forwardPass(activation1.output)  # result of activation goes into hidden feed forward
+    """
+    hiddenLayer.forwardPass(inputs)  # result of activation goes into hidden feed forward
 
     activation1.forward(hiddenLayer.output)
 
@@ -197,15 +204,15 @@ def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theL
 data=dataExtraction()
 yt=[]
 xt=[]
-p=90
+p=500000
 percentageofCSV=p/1000000
 arrange(yt,xt)
 inputs=getInputs(xt,percentageofCSV)
 
 #Initialization
 inputLayer= Layer(12,3) #input layer creation
-hiddenLayer= Layer(3,3)# Hidden layer creation
-outputLayer= Layer(3,1)# Output layer
+hiddenLayer= Layer(12,3)# Hidden layer creation
+outputLayer= Layer(3,3)# Output layer
 smActivation = softmax()
 activation1=Sigmoid() #activation for layer 1(Input layer)
 theLoss = loss()
@@ -230,7 +237,7 @@ loss=[]
 acc=[]
 avgAcc=0
 j=0
-epochs=100
+epochs=1000
 l = 0.1
 while(avgAcc<0.1):
     for i in range(epochs):
@@ -248,7 +255,7 @@ while(avgAcc<0.1):
             l += 0.1
         j += 1
 
-        backPropagation(0.5, outputLayer, hiddenLayer, inputLayer, exp)
+        backPropagation(0.02, outputLayer, hiddenLayer, inputLayer, exp, smActivation,activation1)
     avgAcc=np.mean(acc)
     print("Mean accuracy: ", avgAcc)
 

@@ -139,17 +139,14 @@ def Accuracy(inputs, expected):
     return accuracy
 
 def importWeights(HLayer, OLayer):
-    inLayer_filename = "input_hidden_updated.txt"
-    with open(inLayer_filename, newline='') as f:
-        reader = csv.reader(f)
-        data = list(reader)
+    inLayer_filename = "input_hidden_updated.npy"
+
     print("Input layer weights imported!!")
+    data = np.load(inLayer_filename)
     HLayer.weights=np.array(data)
 
-    oLayer_filename = "hidden_output_updated.txt"
-    with open(oLayer_filename, newline='') as f:
-        reader = csv.reader(f)
-        data = list(reader)
+    oLayer_filename = "hidden_output_updated.npy"
+    data = np.load(oLayer_filename)
     print("Hidden layer weights extracted!!")
     OLayer.weights = np.array(data)
 
@@ -172,14 +169,15 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut, activation1, smActivation
             Hlayer.weights[i+j] = Hlayer.weights[i+j] - rate * newWeightI[j]
         i+=3
 
-    filename = "input_hidden_updated.txt"
-
-    with open(filename, 'w') as csvfile:  # Write data to text file
+    filename = "input_hidden_updated.npy"
+    np.save(filename, Hlayer.weights)
+    with open("input_hidden_updated.txt", 'w') as csvfile:  # Write data to text file
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(Hlayer.weights)
 
-    filename = "hidden_output_updated.txt"
-    with open(filename, 'w') as csvfile:  # Write data to text file
+    filename = "hidden_output_updated.npy"
+    np.save(filename, Olayer.weights)
+    with open("hidden_output_updated.txt", 'w') as csvfile:  # Write data to text file
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(Olayer.weights)
 
@@ -220,17 +218,19 @@ activation2=Sigmoid()
 theLoss = loss()
 exp = oneHotEncoding(yt, p)
 
-#importWeights(hiddenLayer,outputLayer)
+importWeights(hiddenLayer,outputLayer)
 forwardPass(inputLayer,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
 
 ##Save weights to file
-filename = "input_hidden.txt"
-with open(filename, 'w') as csvfile:  # Write data to text file
+filename = "input_hidden.npy"
+np.save(filename, hiddenLayer.weights)
+with open("input_hidden.txt", 'w') as csvfile:  # Write data to text file
     csvwriter = csv.writer(csvfile)
-    csvwriter.writerow(inputLayer.weights)
+    csvwriter.writerow(hiddenLayer.weights)
 
-filename = "hidden_output.txt"
-with open(filename, 'w') as csvfile:  # Write data to text file
+filename = "hidden_output.npy"
+np.save(filename, outputLayer.weights)
+with open("hidden_output.txt", 'w') as csvfile:  # Write data to text file
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(outputLayer.weights)
 
@@ -239,7 +239,7 @@ loss=[]
 acc=[]
 avgAcc=0
 j=0
-epochs=73
+epochs=7
 l = 0.1
 while(avgAcc<0.1):
     for i in range(epochs):

@@ -3,7 +3,7 @@ import csv
 import time
 import math
 import matplotlib.pyplot as plt
-np.random.seed(2)
+np.random.seed(0)
 
 import sys
 
@@ -181,24 +181,29 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut, activation1, smActivation
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(Olayer.weights)
 
-def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp):
+def forwardPass(X,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp):
 
     """
     inputLayer.forwardPass(inputs)
 
     activation1.forward(inputLayer.output)  # input layer goes into activation function in hidden layer
     """
-    hiddenLayer.forwardPass(inputs)  # result of activation goes into hidden feed forward
+    hiddenLayer.forwardPass(X)  # result of activation goes into hidden feed forward
 
     activation1.forward(hiddenLayer.output)
 
     outputLayer.forwardPass(activation1.output)
     smActivation.forward(outputLayer.output)
 
-    theLoss.getMSE(smActivation.output,exp)
+    theLoss.getLoss(smActivation.output,exp)
 
 
-
+def testPhase(xt,yt):
+    inputsTest=getInputs(xt[700000:],1)
+    exp = oneHotEncoding(yt[700000:], 300000)
+    forwardPass(inputsTest,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
+    print("Prediction: ",activation2.output[0])
+    print("Expected: ",exp[0])
 
 data=dataExtraction()
 yt=[]
@@ -218,8 +223,8 @@ activation2=Sigmoid()
 theLoss = loss()
 exp = oneHotEncoding(yt, p)
 
-importWeights(hiddenLayer,outputLayer)
-forwardPass(inputLayer,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
+#importWeights(hiddenLayer,outputLayer)
+forwardPass(inputs,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
 
 ##Save weights to file
 filename = "input_hidden.npy"
@@ -239,37 +244,31 @@ loss=[]
 acc=[]
 avgAcc=0
 j=0
-epochs=7
+epochs=124
 l = 0.1
 while(avgAcc<0.1):
     for i in range(epochs):
         if(i==0):
             print("Training in progress: ")
-        forwardPass(inputLayer,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
-        loss.append(theLoss.output)
+        forwardPass(inputs,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
+        loss.append(theLoss.output/p)
         acc.append(Accuracy(activation2.output,exp))
         if (j / epochs >= l):
             #print("#", end=" ")
-            print(theLoss.output)
+            print(theLoss.output/p)
             t = time.localtime()
             current_time = time.strftime("%H:%M:%S", t)
             print(current_time)
             l += 0.1
         j += 1
 
-        backPropagation(0.42, outputLayer, hiddenLayer, inputLayer, exp, activation2,activation1)
+        backPropagation(0.4, outputLayer, hiddenLayer, inputLayer, exp, activation2,activation1)
     avgAcc=np.mean(acc)
     print("Mean accuracy: ", avgAcc)
 
 
 
-#print(theLoss.output/p)
-print(activation2.output[:1])
 
-
-
-forwardPass(inputLayer,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
-print(activation2.output[:1])
 
 t=np.arange(0,epochs,1)
 h=acc
@@ -291,3 +290,8 @@ plt.xlabel('# of Epochs')
 plt.ylabel('Loss')
 plt.title ('Loss')
 plt.show()
+
+time.sleep(2)
+print("Testing phase begin.....", "Good luck")
+testPhase(xt,yt)
+

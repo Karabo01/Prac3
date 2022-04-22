@@ -138,20 +138,20 @@ def Accuracy(inputs, expected):
     accuracy = predicions_correct.mean()
     return accuracy
 
-def importWeights(inLayer, HLayer, OLayer):
+def importWeights(HLayer, OLayer):
     inLayer_filename = "input_hidden_updated.txt"
     with open(inLayer_filename, newline='') as f:
         reader = csv.reader(f)
         data = list(reader)
     print("Input layer weights imported!!")
-    inLayer.weights=np.array(data)
+    HLayer.weights=np.array(data)
 
     oLayer_filename = "hidden_output_updated.txt"
     with open(oLayer_filename, newline='') as f:
         reader = csv.reader(f)
         data = list(reader)
     print("Hidden layer weights extracted!!")
-    HLayer.weights = np.array(data)
+    OLayer.weights = np.array(data)
 
 def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut, activation1, smActivation):
     X=np.array(inputs)
@@ -173,14 +173,15 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut, activation1, smActivation
         i+=3
 
     filename = "input_hidden_updated.txt"
+
     with open(filename, 'w') as csvfile:  # Write data to text file
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(Ilayer.weights)
+        csvwriter.writerow(Hlayer.weights)
 
     filename = "hidden_output_updated.txt"
     with open(filename, 'w') as csvfile:  # Write data to text file
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(Hlayer.weights)
+        csvwriter.writerow(Olayer.weights)
 
 def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp):
 
@@ -204,7 +205,7 @@ def forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theL
 data=dataExtraction()
 yt=[]
 xt=[]
-p=500000
+p=700000
 percentageofCSV=p/1000000
 arrange(yt,xt)
 inputs=getInputs(xt,percentageofCSV)
@@ -214,12 +215,13 @@ inputLayer= Layer(12,3) #input layer creation
 hiddenLayer= Layer(12,3)# Hidden layer creation
 outputLayer= Layer(3,3)# Output layer
 smActivation = softmax()
-activation1=Sigmoid() #activation for layer 1(Input layer)
+activation1=Sigmoid() #activation for layer 1
+activation2=Sigmoid()
 theLoss = loss()
 exp = oneHotEncoding(yt, p)
 
-#importWeights(inputLayer,hiddenLayer,outputLayer)
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+#importWeights(hiddenLayer,outputLayer)
+forwardPass(inputLayer,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
 
 ##Save weights to file
 filename = "input_hidden.txt"
@@ -230,22 +232,22 @@ with open(filename, 'w') as csvfile:  # Write data to text file
 filename = "hidden_output.txt"
 with open(filename, 'w') as csvfile:  # Write data to text file
     csvwriter = csv.writer(csvfile)
-    csvwriter.writerow(hiddenLayer.weights)
+    csvwriter.writerow(outputLayer.weights)
 
 
 loss=[]
 acc=[]
 avgAcc=0
 j=0
-epochs=1000
+epochs=73
 l = 0.1
 while(avgAcc<0.1):
     for i in range(epochs):
         if(i==0):
             print("Training in progress: ")
-        forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
+        forwardPass(inputLayer,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
         loss.append(theLoss.output)
-        acc.append(Accuracy(smActivation.output,exp))
+        acc.append(Accuracy(activation2.output,exp))
         if (j / epochs >= l):
             #print("#", end=" ")
             print(theLoss.output)
@@ -255,19 +257,19 @@ while(avgAcc<0.1):
             l += 0.1
         j += 1
 
-        backPropagation(0.02, outputLayer, hiddenLayer, inputLayer, exp, smActivation,activation1)
+        backPropagation(0.42, outputLayer, hiddenLayer, inputLayer, exp, activation2,activation1)
     avgAcc=np.mean(acc)
     print("Mean accuracy: ", avgAcc)
 
 
 
 #print(theLoss.output/p)
-print(smActivation.output[:1])
+print(activation2.output[:1])
 
 
 
-forwardPass(inputLayer,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp)
-print(smActivation.output[:1])
+forwardPass(inputLayer,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
+print(activation2.output[:1])
 
 t=np.arange(0,epochs,1)
 h=acc

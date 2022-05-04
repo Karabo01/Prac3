@@ -5,20 +5,7 @@ import math
 import matplotlib.pyplot as plt
 np.random.seed(0)
 
-import sys
 
-def progressbar(it, prefix="", size=60, file=sys.stdout):#Progress bar for indicating training progress
-    count = len(it)
-    def show(j):
-        x = int(size*j/count)
-        file.write("%s[%s%s] %i/%i\r" % (prefix, "█"*x, "."*(size-x), j, count))
-        file.flush()
-    show(0)
-    for i, item in enumerate(it):
-        yield item
-        show(i+1)
-    file.write("\n")
-    file.flush()
 
 
 class Layer:# Class defines different layers in NN
@@ -163,13 +150,7 @@ def backPropagation(rate, Olayer,Hlayer,expOut, activation1, smActivation):
 
     Olayer.weights= Olayer.weights - rate* newWeightH
     Hlayer.weights = Hlayer.weights - rate*newWeightI
-    """
-    i=0
-    while(i<12):
-        for j in range(3):
-            Hlayer.weights[i+j] = Hlayer.weights[i+j] - rate * newWeightI[j]
-        i+=3
-    """
+
     filename = "input_hidden_updated-Copy.npy"
     np.save(filename, Hlayer.weights)
     with open("input_hidden_updated.txt", 'w') as csvfile:  # Write data to text file
@@ -247,12 +228,12 @@ loss=[]
 acc=[]
 avgAcc=0
 j=0
-epochs = 58Be
+epochs = 58
 l = 0.1
 rate=0.8
 b=0
-importWeights(hiddenLayer,outputLayer)
-while(avgAcc<0.01):# repeats traning process until certain accuarcy is achieved
+#importWeights(hiddenLayer,outputLayer)
+while(avgAcc<0.01):# repeats training process until certain accuracy is achieved
     for i in range(epochs):
         if(i==0):
             print("Training in progress: ")
@@ -260,7 +241,6 @@ while(avgAcc<0.01):# repeats traning process until certain accuarcy is achieved
         loss.append(theLoss.output/p)
         acc.append(Accuracy(activation2.output,exp))
         if (j / epochs >= l):
-            #print("#", end=" ")
             print(theLoss.output/p)
             t = time.localtime()
             current_time = time.strftime("%H:%M:%S", t)

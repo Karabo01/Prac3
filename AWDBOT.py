@@ -41,7 +41,7 @@ class softmax:
         self.output = probabilities
 
 class loss:
-    def getLoss(self, inputs, expected):
+    def getLoss(self, inputs, expected): # returns Loss
         fLoss = 0
         epoch = np.subtract(expected,inputs, out = None)
         epoch = np.square(epoch)
@@ -117,7 +117,7 @@ def getInputs(xt,percent):#Return a batch of inputs
         X[i][index + 9] = 1
     return X
 
-def oneHotEncoding(arr, batch_size):
+def oneHotEncoding(arr, batch_size): # one hot encodes RPS
     onehot = []
     temp = [0,0,0]
     for i in range (batch_size):
@@ -133,24 +133,24 @@ def oneHotEncoding(arr, batch_size):
     output= np.array(onehot)
     return output
 
-def Accuracy(inputs, expected):
+def Accuracy(inputs, expected):# Calculates the accuarcy of the predicted output
     predicions_correct = inputs.argmax(axis=1) == expected.argmax(axis=1)
     accuracy = predicions_correct.mean()
     return accuracy
 
-def importWeights(HLayer, OLayer):
-    inLayer_filename = "input_hidden_updated.npy"
+def importWeights(HLayer, OLayer):# imports optial weights saved from training
+    inLayer_filename = "input_hidden_opt.npy"
 
     print("Input layer weights imported!!")
     data = np.load(inLayer_filename)
     HLayer.weights=np.array(data)
 
-    oLayer_filename = "hidden_output_updated.npy"
+    oLayer_filename = "hidden_output_opt.npy"
     data = np.load(oLayer_filename)
     print("Hidden layer weights extracted!!")
     OLayer.weights = np.array(data)
 
-def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut, activation1, smActivation):
+def backPropagation(rate, Olayer,Hlayer,expOut, activation1, smActivation):
     X=np.array(inputs)
     outError= smActivation.output - expOut
     outDelta= outError * smActivation.output * (1 - smActivation.output)
@@ -159,35 +159,32 @@ def backPropagation(rate, Olayer,Hlayer,Ilayer,expOut, activation1, smActivation
     hiddenDelta = hiddenError * activation1.output * (1-activation1.output)
 
     newWeightH= np.dot(activation1.output.T,outDelta)/expOut.size
-    newWeightI = np.dot(hiddenLayer.output.T,hiddenDelta)/expOut.size
+    newWeightI = np.dot(X.T,hiddenDelta)/expOut.size
 
     Olayer.weights= Olayer.weights - rate* newWeightH
-    #Hlayer.weights = Hlayer.weights - rate*newWeightI
+    Hlayer.weights = Hlayer.weights - rate*newWeightI
+    """
     i=0
     while(i<12):
         for j in range(3):
             Hlayer.weights[i+j] = Hlayer.weights[i+j] - rate * newWeightI[j]
         i+=3
-
-    filename = "input_hidden_updated.npy"
+    """
+    filename = "input_hidden_updated-Copy.npy"
     np.save(filename, Hlayer.weights)
     with open("input_hidden_updated.txt", 'w') as csvfile:  # Write data to text file
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(Hlayer.weights)
 
-    filename = "hidden_output_updated.npy"
+    filename = "hidden_output_updated-Copy.npy"
     np.save(filename, Olayer.weights)
     with open("hidden_output_updated.txt", 'w') as csvfile:  # Write data to text file
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(Olayer.weights)
 
-def forwardPass(X,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp):
 
-    """
-    inputLayer.forwardPass(inputs)
+def forwardPass(X,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp): # Does a forward propagation
 
-    activation1.forward(inputLayer.output)  # input layer goes into activation function in hidden layer
-    """
     hiddenLayer.forwardPass(X)  # result of activation goes into hidden feed forward
 
     activation1.forward(hiddenLayer.output)
@@ -198,12 +195,19 @@ def forwardPass(X,hiddenLayer,outputLayer,smActivation,activation1,theLoss,exp):
     theLoss.getLoss(smActivation.output,exp)
 
 
-def testPhase(xt,yt):
+def testPhase(xt,yt):# Imports testing data and tests
     inputsTest=getInputs(xt[700000:],1)
     exp = oneHotEncoding(yt[700000:], 300000)
     forwardPass(inputsTest,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
-    print("Prediction: ",activation2.output[0])
-    print("Expected: ",exp[0])
+    print("Prediction: ",activation2.output)
+    print("Expected: ",exp)
+
+def saveWeights(Hlayer,Olayer):# saves optimal weights in file
+    filename = "input_hidden_opt.npy"
+    np.save(filename, Hlayer.weights)
+
+    filename = "hidden_output_opt.npy"
+    np.save(filename, Olayer.weights)
 
 data=dataExtraction()
 yt=[]
@@ -214,17 +218,16 @@ arrange(yt,xt)
 inputs=getInputs(xt,percentageofCSV)
 
 #Initialization
-inputLayer= Layer(12,3) #input layer creation
 hiddenLayer= Layer(12,3)# Hidden layer creation
 outputLayer= Layer(3,3)# Output layer
 smActivation = softmax()
 activation1=Sigmoid() #activation for layer 1
-activation2=Sigmoid()
+activation2=Sigmoid()# acticavtion of output layer
 theLoss = loss()
 exp = oneHotEncoding(yt, p)
 
 #importWeights(hiddenLayer,outputLayer)
-forwardPass(inputs,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp)
+forwardPass(inputs,hiddenLayer,outputLayer,activation2,activation1,theLoss,exp) # First forward pass to initialize network
 
 ##Save weights to file
 filename = "input_hidden.npy"
@@ -244,9 +247,12 @@ loss=[]
 acc=[]
 avgAcc=0
 j=0
-epochs=124
+epochs = 58Be
 l = 0.1
-while(avgAcc<0.1):
+rate=0.8
+b=0
+importWeights(hiddenLayer,outputLayer)
+while(avgAcc<0.01):# repeats traning process until certain accuarcy is achieved
     for i in range(epochs):
         if(i==0):
             print("Training in progress: ")
@@ -261,8 +267,11 @@ while(avgAcc<0.1):
             print(current_time)
             l += 0.1
         j += 1
-
-        backPropagation(0.4, outputLayer, hiddenLayer, inputLayer, exp, activation2,activation1)
+        if(acc[len(acc)-1]>acc[len(acc)-2]>0.46):
+            print("Saving Weights")
+            saveWeights(hiddenLayer,outputLayer)
+            rate=-0.2
+        backPropagation(rate, outputLayer, hiddenLayer, exp, activation2,activation1)
     avgAcc=np.mean(acc)
     print("Mean accuracy: ", avgAcc)
 
@@ -292,6 +301,7 @@ plt.title ('Loss')
 plt.show()
 
 time.sleep(2)
+importWeights(hiddenLayer,outputLayer)
 print("Testing phase begin.....", "Good luck")
 testPhase(xt,yt)
 
